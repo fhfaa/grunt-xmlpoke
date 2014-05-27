@@ -88,9 +88,6 @@ module.exports = function (grunt) {
 					}
 					name = name.substring(name.lastIndexOf(':') + 1);
 				}
-				grunt.log.writeln("NS: " + ns);
-				grunt.log.writeln("name: " + name);
-				grunt.log.writeln("selector: " + query);
 				
 				var select = options.namespaces ? xpath.useNamespaces(options.namespaces) : xpath.select,
 					nodes = select(query, doc);
