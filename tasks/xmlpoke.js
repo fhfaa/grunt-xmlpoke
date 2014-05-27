@@ -41,8 +41,9 @@ module.exports = function (grunt) {
                 domParser = new xmldom.DOMParser(),
                 doc = domParser.parseFromString(src),
                 xmlSerializer = new xmldom.XMLSerializer(),
-                replacements = options.replacements || [options];
-            
+                replacements = options.replacements || (options.xpath ? [options] : []),
+				insertions = options.insertions || [];
+			
             replacements.forEach(function (replacement) {
                 var queries = typeof replacement.xpath === 'string' ? [replacement.xpath] : replacement.xpath,
                     getValue = _.isFunction(replacement.value) ? replacement.value : function () { return replacement.value || ''; };
@@ -60,6 +61,65 @@ module.exports = function (grunt) {
                     });
                 });
             });
+			
+			
+			insertions.forEach(function (insertion) {
+				var query = insertion.xpath,
+					name = typeof insertion.node === 'string' ? insertion.node : null,
+					getValue = _.isFunction(insertion.value) ? insertion.value : function () { return insertion.value || ''; },
+					isAttr = false,
+					ns;
+				
+				if (!name) {
+					grunt.log.warn('No node<string> given for insertion at ' + query);
+					return;
+				}
+				
+				if (name.charAt(0) === '@') {
+					isAttr = true;
+					name = name.substring(1);
+				}
+				
+				if (name.lastIndexOf(':') > -1) {
+					ns = name.substring(0, name.lastIndexOf(':'));
+					if (!options.namespaces[ns]) {
+						grunt.log.error('No URI given for namespace ' + ns + ' in options.namespaces');
+						return;
+					}
+					name = name.substring(name.lastIndexOf(':') + 1);
+				}
+				grunt.log.writeln("NS: " + ns);
+				grunt.log.writeln("name: " + name);
+				grunt.log.writeln("selector: " + query);
+				
+				var select = options.namespaces ? xpath.useNamespaces(options.namespaces) : xpath.select,
+					nodes = select(query, doc);
+					
+				nodes.forEach(function (node) {
+					var value = getValue(),
+						newNode;
+						
+					if (isAttr) {
+						if (ns) {
+							node.setAttributeNS(options.namespaces[ns], ns + ':' + name, value);
+						} else {
+							node.setAttribute(name, value);
+						}
+					} else {
+						newNode = select(name, node)[0];
+						if (!newNode) {
+							
+							if (ns) {
+								newNode = doc.createElementNS(options.namespaces[ns], ns + ':' + name);
+							} else {
+								newNode = doc.createElement(name);
+							}
+							node.appendChild(newNode);
+						}
+						newNode.textContent = value;
+					}
+				});
+			});
 
             // Write the destination file.
             grunt.file.write(f.dest, xmlSerializer.serializeToString(doc));

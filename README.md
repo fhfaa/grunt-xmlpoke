@@ -2,6 +2,15 @@
 
 > Updates values in XML files based on XPath queries.  Similar to the `xmlpoke` task in NAnt.
 
+<br>
+> **Quickly hacked to allow creating new child elements or adding new attributes.**
+>
+> **Barely tested or error-proofed.**
+> 
+> **Please see** [the original repo](https://github.com/bdukes/grunt-xmlpoke) **for a stable and supported version of grunt-xmlpoke.**
+>
+> **The rest if this README is that of the original repo.**
+
 ## Getting Started
 This plugin requires Grunt `~0.4.2`
 
@@ -61,6 +70,20 @@ Type: `Array`
 Default value: `undefined`
 
 An array of replacement options (i.e. objects with `xpath` and `value` properties)
+
+#### options.insertions
+Type: `Array`
+Default value: `undefined`
+
+An array of insertion options (i.e. objects with `xpath`, `value` and `node` properties)
+
+The new node/attr is attached to all nodes matching the xpath selector.
+
+`xpath` is the selector for the element(s) to be manipulated
+
+`node` is the node name to be inserted (if-exist-update), e.g. `new-elem` or `@new-attr`
+
+`value` is the value to be given to the new attr/note. Default to `""`
 
 ### Usage Examples
 
@@ -173,3 +196,4 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
  - 0.2.1 &mdash; Color filename when logged
  - 0.3.0 &mdash; Allow specifying replacement value as a function
  - 0.4.0 &mdash; Allow specifying namespaces
+ - 0.5.0 &mdash; Allow adding elements or attributes via "insertions" option

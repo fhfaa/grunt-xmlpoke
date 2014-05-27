@@ -116,5 +116,45 @@ exports.xmlpoke = {
         test.equal(actual, expected, 'should support namespace in xpath.');
 
         test.done();
-    }
+    },
+	create_attr : function(test){
+		test.expect(1);
+		
+		var actual = grunt.file.read('tmp/create_attr.xml'),
+			expected = grunt.file.read('test/expected/create_attr.xml');
+			
+		test.equal(actual, expected, 'should be able to create regular attributes');
+		
+		test.done();
+	},
+	create_attr_ns : function(test){
+		test.expect(1);
+		
+		var actual = grunt.file.read('tmp/create_attr_ns.xml'),
+			expected = grunt.file.read('test/expected/create_attr_ns.xml');
+			
+		test.equal(actual, expected, 'should be able to create namespaced attributes');
+		
+		test.done();
+	},
+	create_element : function(test){
+		test.expect(1);
+		
+		var actual = grunt.file.read('tmp/create_element.xml'),
+			expected = grunt.file.read('test/expected/create_element.xml');
+			
+		test.equal(actual, expected, 'should be able to create regular elements');
+		
+		test.done();
+	},
+	create_element_ns : function(test){
+		test.expect(1);
+		
+		var actual = grunt.file.read('tmp/create_element_ns.xml'),
+			expected = grunt.file.read('test/expected/create_element_ns.xml');
+			
+		test.equal(actual, expected, 'should be able to create namespaced elements');
+		
+		test.done();
+	}
 };

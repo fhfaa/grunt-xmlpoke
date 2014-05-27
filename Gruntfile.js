@@ -3,6 +3,7 @@
  * https://github.com/bdukes/grunt-xmlpoke
  *
  * Copyright (c) 2014 Brian Dukes
+ * Extended by github/fhfaa
  * Licensed under the MIT license.
  */
 
@@ -128,8 +129,64 @@ module.exports = function (grunt) {
                     },
                     xpath: '/RDF/Description/em:version',
                     value: '1.2.4'
-                }
-            }
+                },
+			},
+			create_attr: {
+				dest: 'tmp/create_attr.xml',
+				src: 'test/fixtures/namespaces.xml',
+				options: {
+					namespaces: {
+						'em': 'http://www.mozilla.org/2004/em-rdf#'
+					},
+					insertions: [{
+						xpath: '//Description',
+						node: '@hello',
+						value: 'world'
+					}]
+				}
+			},
+			create_attr_ns: {
+				dest: 'tmp/create_attr_ns.xml',
+				src: 'test/fixtures/namespaces.xml',
+				options: {
+					namespaces: {
+						'em': 'http://www.mozilla.org/2004/em-rdf#'
+					},
+					insertions: [{
+						xpath: '//Description',
+						node: '@em:helloTwo',
+						value: 'world'
+					}]
+				}
+			},
+			create_element: {
+				dest: 'tmp/create_element.xml',
+				src: 'test/fixtures/namespaces.xml',
+				options: {
+					namespaces: {
+						'em': 'http://www.mozilla.org/2004/em-rdf#'
+					},
+					insertions: [{
+						xpath: '//Description',
+						node: 'new-elem',
+						value: 'world'
+					}]
+				}
+			},
+			create_element_ns: {
+				dest: 'tmp/create_element_ns.xml',
+				src: 'test/fixtures/namespaces.xml',
+				options: {
+					namespaces: {
+						'em': 'http://www.mozilla.org/2004/em-rdf#'
+					},
+					insertions: [{
+						xpath: '//Description',
+						node: 'em:new-elem',
+						value: 'worldTwo'
+					}]
+				}
+			}
         },
 
         // Unit tests.
