@@ -113,7 +113,9 @@ module.exports = function (grunt) {
 							}
 							node.appendChild(newNode);
 						}
-						newNode.textContent = value;
+						if (value) { 
+							newNode.textContent = value;
+						}
 					}
 				});
 			});
