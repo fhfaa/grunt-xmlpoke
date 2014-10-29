@@ -3,7 +3,7 @@
 > Updates values in XML files based on XPath queries.  Similar to the `xmlpoke` task in NAnt.
 
 <br>
-> **Quickly hacked to allow creating new child elements or adding new attributes.**
+> **Quickly hacked to allow creating new child elements or adding new attributes, or to remove elements.**
 >
 > **Barely tested or error-proofed.**
 > 
@@ -144,6 +144,14 @@ grunt.initConfig({
 })
 ```
 
+#### options.deletions
+Type: `Array`
+Default value: `undefined`
+
+An array of deletion options (i.e. objects with an `xpath`, property)
+
+TODO: doc/examples
+
 #### Multiple XPath Queries
 In this example, the same value is put intp multiple locations. So if the `testing.xml` file has the content `<x y="999" />`, the generated result in this case would be `<x y="111">111</x>`.
 
@@ -197,3 +205,6 @@ In lieu of a formal styleguide, take care to maintain the existing coding style.
  - 0.3.0 &mdash; Allow specifying replacement value as a function
  - 0.4.0 &mdash; Allow specifying namespaces
  - 0.5.0 &mdash; Allow adding elements or attributes via "insertions" option
+ - 0.5.1 &mdash; TODO
+ - 0.5.2 &mdash; Allow [index] selection for insertion xpath (stripped from nodeName for actual insertion)
+         &mdash; Allow removing elements via "deletions" option (untested)

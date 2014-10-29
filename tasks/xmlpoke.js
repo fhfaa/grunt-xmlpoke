@@ -42,7 +42,21 @@ module.exports = function (grunt) {
                 doc = domParser.parseFromString(src),
                 xmlSerializer = new xmldom.XMLSerializer(),
                 replacements = options.replacements || (options.xpath ? [options] : []),
-				insertions = options.insertions || [];
+				insertions = options.insertions || [],
+				deletions = options.deletions || [];
+				
+			deletions.forEach(function (deletion) {
+				var query = deletion.xpath,
+					select = options.namespaces ? xpath.useNamespaces(options.namespaces) : xpath.select,
+                    nodes = select(query, doc);
+				
+				if (!nodes.length) { return; }
+				
+				grunt.verbose.writeln('Deleting ' + nodes.length + ' node(s) for query: ' + query);
+				nodes.forEach(function (node) {
+					node.parentNode.removeChild(node);
+				});
+			});
 			
             replacements.forEach(function (replacement) {
                 var queries = typeof replacement.xpath === 'string' ? [replacement.xpath] : replacement.xpath,
@@ -103,13 +117,14 @@ module.exports = function (grunt) {
 							node.setAttribute(name, value);
 						}
 					} else {
+						
 						newNode = select(name, node)[0];
 						if (!newNode) {
 							
 							if (ns) {
-								newNode = doc.createElementNS(options.namespaces[ns], ns + ':' + name);
+								newNode = doc.createElementNS(options.namespaces[ns], ns + ':' + name.replace(/\[\d+?\]$/g, ''));
 							} else {
-								newNode = doc.createElement(name);
+								newNode = doc.createElement(name.replace(/\[\d+?\]$/g, ''));
 							}
 							node.appendChild(newNode);
 						}
