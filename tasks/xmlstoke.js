@@ -240,13 +240,31 @@ module.exports = function (grunt) {
 			// If "xpath" is given directly inside of the options object,
 			// assume we are in xmlpoke-mode and treat the entire options obj
 			// as the config for a single replacement action.
-			(options.replacements || (options.xpath ? [options] : [])).
+			(options.replacements || options.updates || (options.xpath ? [options] : [])).
 				forEach(function (replacement) {
 					toArray(replacement.xpath).
 						forEach(updateFn.bind(null, replacement.value));
 				});
 			
-			
+			// Actions is a customizable array of insertions, deletions and updates, but in any order
+			// The type of action is denoted by the first char of the "type" option string (CI)
+			// That way, "i", "INS", "inSert", and even "idiotic code" denote an Insertion,
+			// While anything starting with d/D denotes a deletion.
+			// Defaults to Update
+			(options.actions || []).
+				forEach(function (action) {
+					var type = (action.type || '').toUpperCase().charAt(0);
+					switch (action.type) {
+						case 'D': toArray(action.xpath).
+							forEach(deletionFn);
+							break;
+						case 'I': toArray(action.xpath).
+							forEach(insertionFn.bind(null, action.value, action.node));
+							break;
+						default: toArray(action.xpath).
+							forEach(updateFn.bind(null, action.value));
+					}
+				});
 			
 			// Write the destination file.
 			grunt.file.write(f.dest, xmlSerializer.serializeToString(doc));
