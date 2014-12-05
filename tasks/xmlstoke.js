@@ -50,6 +50,101 @@ module.exports = function (grunt) {
 	
 	
 	
+	function handleDeletionQuery(document, selectFn, query) {
+		var nodes = selectFn(query, document);
+					
+		grunt.verbose.writeln('Deleting ' + nodes.length + ' node(s) for query: ' + query);
+		if (!nodes.length) { return; }
+		
+		nodes.forEach(deleteNode);
+	}
+	
+	
+	
+	
+	function handleUpdateQuery(document, selectFn, value, query) {
+		var nodes = selectFn(query, document);
+		
+		grunt.verbose.writeln(
+			'Updating value of ' + nodes.length + ' node(s) ' + 
+			(typeof value === 'function' ? 'via callback' : 'to "' + ("" + value) + '"') +
+			'for query: ' + query
+		);
+		if (!nodes.length) { return; }
+		
+		
+		nodes.forEach(function (node) {
+			updateNodeValue(node, value);
+		});
+	}
+	
+	
+	
+	
+	function handleInsertionQuery(document, selectFn, namespaces, value, nodeName, query) {
+		var name = typeof nodeName === 'string' ? nodeName : null,
+			isAttr = false,
+			ns;
+		
+		namespaces = namespaces || {};
+		
+		if (!name) {
+			grunt.log.warn('No node<string> given for insertion at ' + query);
+			return;
+		}
+		
+		if (name.charAt(0) === '@') {
+			isAttr = true;
+			name = name.substring(1);
+		}
+		
+		if (name.lastIndexOf(':') > -1) {
+			ns = name.substring(0, name.lastIndexOf(':'));
+			name = name.substring(name.lastIndexOf(':') + 1);
+			
+			if (!namespaces[ns]) {
+				grunt.log.error('No URI given for namespace "' + ns + '" in options.namespaces');
+				return;
+			}
+			
+		}
+		
+		var nodes = selectFn(query, document);
+		if (!nodes.length) { return; }
+		
+		nodes.forEach(function (node) {
+			var val = typeof value !== 'function' ? value : value(node),
+				newNode;
+			
+			if (!val && val !== 0) { val = ''; }
+			
+			if (isAttr) {
+				if (ns) {
+					node.setAttributeNS(namespaces[ns], ns + ':' + name, val);
+				} else {
+					node.setAttribute(name, val);
+				}
+			} else {
+				
+				newNode = selectFn(name, node)[0];
+				if (!newNode) {
+					
+					if (ns) {
+						newNode = document.createElementNS(namespaces[ns], ns + ':' + name.replace(/\[\d+?\]$/g, ''));
+					} else {
+						newNode = document.createElement(name.replace(/\[\d+?\]$/g, ''));
+					}
+					node.appendChild(newNode);
+				}
+				if (val) { 
+					newNode.textContent = val;
+				}
+			}
+		});
+	}
+	
+	
+	
 	
 	grunt.registerMultiTask('xmlstoke', 'Updates values in XML files based on XPath queries', function () {
 		// Merge task-specific and/or target-specific options with these defaults.
@@ -74,23 +169,18 @@ module.exports = function (grunt) {
 				
 				replacements = options.replacements || (options.xpath ? [options] : []),
 				insertions = options.insertions || [],
-				deletions = options.deletions || [];
-			
+				deletions = options.deletions || [],
+				
+				deletionFn = handleDeletionQuery.bind(null, doc, select),
+				updateFn = handleUpdateQuery.bind(null, doc, select),
+				insertionFn = handleInsertionQuery.bind(null, doc, select, options.namespaces || {});
 			
 			
 			
 			deletions.forEach(function (deletion) {
 				var queries = typeof deletion.xpath === 'string' ? [deletion.xpath] : deletion.xpath;
 				
-				queries.forEach(function (query) {
-					var nodes = select(query, doc);
-					
-					grunt.verbose.writeln('Deleting ' + nodes.length + ' node(s) for query: ' + query);
-					if (!nodes.length) { return; }
-					
-					nodes.forEach(deleteNode);
-					
-				});
+				queries.forEach(deletionFn);
 			});
 			
 			
@@ -98,82 +188,17 @@ module.exports = function (grunt) {
 			
 			replacements.forEach(function (replacement) {
 				var queries = typeof replacement.xpath === 'string' ? [replacement.xpath] : replacement.xpath;
-					
-				queries.forEach(function (query) {
-					var nodes = select(query, doc);
-					
-					grunt.verbose.writeln(
-						'Updating value of ' + nodes.length + ' node(s) ' + 
-						(typeof replacements.value === 'function' ? 'via callback' : 'to "' + String(replacement.value) + '"') +
-						'for query: ' + query
-					);
-					if (!nodes.length) { return; }
-					
-					nodes.forEach(function (node) {
-						updateNodeValue(node, replacement.value);
-					});
-				});
+				
+				queries.forEach(updateFn.bind(null, replacement.value));
 			});
 			
 			
 			
 			
 			insertions.forEach(function (insertion) {
-				var query = insertion.xpath,
-					name = typeof insertion.node === 'string' ? insertion.node : null,
-					getValue = typeof insertion.value === 'function' ? insertion.value : function () { return insertion.value || ''; },
-					isAttr = false,
-					ns;
+				var queries = typeof insertion.xpath === 'string' ? [insertion.xpath] : insertion.xpath;
 				
-				if (!name) {
-					grunt.log.warn('No node<string> given for insertion at ' + query);
-					return;
-				}
-				
-				if (name.charAt(0) === '@') {
-					isAttr = true;
-					name = name.substring(1);
-				}
-				
-				if (name.lastIndexOf(':') > -1) {
-					ns = name.substring(0, name.lastIndexOf(':'));
-					if (!options.namespaces[ns]) {
-						grunt.log.error('No URI given for namespace ' + ns + ' in options.namespaces');
-						return;
-					}
-					name = name.substring(name.lastIndexOf(':') + 1);
-				}
-				
-				var nodes = select(query, doc);
-				if (!nodes.length) { return; }
-				
-				nodes.forEach(function (node) {
-					var value = getValue(),
-						newNode;
-						
-					if (isAttr) {
-						if (ns) {
-							node.setAttributeNS(options.namespaces[ns], ns + ':' + name, value);
-						} else {
-							node.setAttribute(name, value);
-						}
-					} else {
-						
-						newNode = select(name, node)[0];
-						if (!newNode) {
-							
-							if (ns) {
-								newNode = doc.createElementNS(options.namespaces[ns], ns + ':' + name.replace(/\[\d+?\]$/g, ''));
-							} else {
-								newNode = doc.createElement(name.replace(/\[\d+?\]$/g, ''));
-							}
-							node.appendChild(newNode);
-						}
-						if (value) { 
-							newNode.textContent = value;
-						}
-					}
-				});
+				queries.forEach(insertionFn.bind(null, insertion.value, insertion.node));
 			});
 			
 			
