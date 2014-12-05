@@ -23,7 +23,8 @@ module.exports = function (grunt) {
 	
 	
 	
-	// Removes a node from the XML document
+	// Helper function - 
+	// DELETES a node from the XML document
 	function deleteNode(node) {
 		node.parentNode.removeChild(node);
 	}
@@ -31,7 +32,8 @@ module.exports = function (grunt) {
 	
 	
 	
-	// Updates the value of a node, value being either a scalar value
+	// Helper function - 
+	// UPDATES the value of a node, value being either a scalar value
 	// or a callback that receives the node to be manipulated
 	// Allows for i.e. fn prepend1(node) { return '1' + node.textContent; }
 	function updateNodeValue(node, value) {
@@ -47,6 +49,58 @@ module.exports = function (grunt) {
 			node.textContent = value;
 		}
 	}
+	
+	
+	
+	// Helper function - 
+	// INSERT-IFEXIST-UPDATES an attribute node
+	function insertUpdateAttributeNode(node, name, val, ns, nsUri) {
+		if (ns) {
+			node.setAttributeNS(nsUri, ns + ':' + name, val);
+		} else {
+			node.setAttribute(name, val);
+		}
+	}
+	
+	
+	
+	// Helper function - 
+	// INSERT-IFEXIST-UPDATES an element node
+	function insertUpdateElementNode(document, selectFn, node, name, val, ns, nsUri) {
+		var newNode = selectFn(name, node)[0];
+		
+		if (!newNode) {
+			if (ns) {
+				newNode = document.createElementNS(nsUri, ns + ':' + name.replace(/\[\d+?\]$/g, ''));
+			} else {
+				newNode = document.createElement(name.replace(/\[\d+?\]$/g, ''));
+			}
+			node.appendChild(newNode);
+		}
+		
+		if (val) { 
+			newNode.textContent = val;
+		}
+	}
+	
+	
+	
+	
+	// Helper function - 
+	// Takes <string> or [<string>*] and returns [<string>*]
+	// Defaults to []
+	function toArray(stringOrArray) {
+		if (stringOrArray instanceof Array) {
+			return stringOrArray.map(String);
+		}
+		
+		if (typeof stringOrArray === 'string' ) {
+			return [stringOrArray];
+		}
+		
+		return [];
+	}
+	
 	
 	
 	
@@ -72,7 +126,6 @@ module.exports = function (grunt) {
 		);
 		if (!nodes.length) { return; }
 		
-		
 		nodes.forEach(function (node) {
 			updateNodeValue(node, value);
 		});
@@ -84,61 +137,55 @@ module.exports = function (grunt) {
 	function handleInsertionQuery(document, selectFn, namespaces, value, nodeName, query) {
 		var name = typeof nodeName === 'string' ? nodeName : null,
 			isAttr = false,
-			ns;
+			ns = false,
+			nodes;
 		
 		namespaces = namespaces || {};
 		
 		if (!name) {
 			grunt.log.warn('No node<string> given for insertion at ' + query);
-			return;
+			return false;
 		}
 		
+		// Check if it's an attribute
 		if (name.charAt(0) === '@') {
 			isAttr = true;
 			name = name.substring(1);
 		}
 		
+		// Check if the name contains a namespace
 		if (name.lastIndexOf(':') > -1) {
 			ns = name.substring(0, name.lastIndexOf(':'));
 			name = name.substring(name.lastIndexOf(':') + 1);
 			
 			if (!namespaces[ns]) {
 				grunt.log.error('No URI given for namespace "' + ns + '" in options.namespaces');
-				return;
+				return false;
 			}
 			
 		}
 		
-		var nodes = selectFn(query, document);
-		if (!nodes.length) { return; }
+		nodes = selectFn(query, document);
+		
+		grunt.verbose.writeln(
+			'Insert/updating childNode "' + (ns ? ns + ':' : '') + name + '" in ' +
+			nodes.length + ' node(s) ' + 
+			(typeof value === 'function' ? 'via callback' : 'to "' + ("" + value) + '"') +
+			' for query: ' + query
+		);
+		if (!nodes.length) { return false; }
 		
 		nodes.forEach(function (node) {
-			var val = typeof value !== 'function' ? value : value(node),
-				newNode;
-			
+			var val = typeof value !== 'function' ? value : value(node);
 			if (!val && val !== 0) { val = ''; }
 			
+			
 			if (isAttr) {
-				if (ns) {
-					node.setAttributeNS(namespaces[ns], ns + ':' + name, val);
-				} else {
-					node.setAttribute(name, val);
-				}
+				// Pass ALL the params
+				insertUpdateAttributeNode(node, name, val, ns, namespaces[ns]);
 			} else {
-				
-				newNode = selectFn(name, node)[0];
-				if (!newNode) {
-					
-					if (ns) {
-						newNode = document.createElementNS(namespaces[ns], ns + ':' + name.replace(/\[\d+?\]$/g, ''));
-					} else {
-						newNode = document.createElement(name.replace(/\[\d+?\]$/g, ''));
-					}
-					node.appendChild(newNode);
-				}
-				if (val) { 
-					newNode.textContent = val;
-				}
+				// But wait, there's more...
+				insertUpdateElementNode(document, selectFn, node, name, val, ns, namespaces[ns]);
 			}
 		});
 	}
@@ -165,42 +212,39 @@ module.exports = function (grunt) {
 			}
 			
 			var doc = domParser.parseFromString(grunt.file.read(f.src[0])),
-				select = options.namespaces ? xpath.useNamespaces(options.namespaces) : xpath.select,
+				select = options.namespaces ?
+					xpath.useNamespaces(options.namespaces) :
+					xpath.select,
 				
-				replacements = options.replacements || (options.xpath ? [options] : []),
-				insertions = options.insertions || [],
-				deletions = options.deletions || [],
-				
+				// Bind file-level "globals" to handlerFns
 				deletionFn = handleDeletionQuery.bind(null, doc, select),
 				updateFn = handleUpdateQuery.bind(null, doc, select),
 				insertionFn = handleInsertionQuery.bind(null, doc, select, options.namespaces || {});
 			
 			
+			// Handle deletions
+			(options.deletions || []).
+				forEach(function (deletion) {
+					toArray(deletion.xpath).
+						forEach(deletionFn);
+				});			
 			
-			deletions.forEach(function (deletion) {
-				var queries = typeof deletion.xpath === 'string' ? [deletion.xpath] : deletion.xpath;
-				
-				queries.forEach(deletionFn);
-			});
+			// Handle insertions
+			(options.insertions || []).
+				forEach(function (insertion) {
+					toArray(insertion.xpath).
+						forEach(insertionFn.bind(null, insertion.value, insertion.node));
+				});
 			
-			
-			
-			
-			replacements.forEach(function (replacement) {
-				var queries = typeof replacement.xpath === 'string' ? [replacement.xpath] : replacement.xpath;
-				
-				queries.forEach(updateFn.bind(null, replacement.value));
-			});
-			
-			
-			
-			
-			insertions.forEach(function (insertion) {
-				var queries = typeof insertion.xpath === 'string' ? [insertion.xpath] : insertion.xpath;
-				
-				queries.forEach(insertionFn.bind(null, insertion.value, insertion.node));
-			});
-			
+			// Handle replacements
+			// If "xpath" is given directly inside of the options object,
+			// assume we are in xmlpoke-mode and treat the entire options obj
+			// as the config for a single replacement action.
+			(options.replacements || (options.xpath ? [options] : [])).
+				forEach(function (replacement) {
+					toArray(replacement.xpath).
+						forEach(updateFn.bind(null, replacement.value));
+				});
 			
 			
 			
