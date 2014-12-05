@@ -1,23 +1,23 @@
 {
-  "name": "grunt-xmlpoke",
-  "description": "Updates values in XML files based on XPath queries",
-  "version": "0.5.2",
-  "homepage": "https://github.com/fhfaa/grunt-xmlpoke",
+  "name": "grunt-xmlstoke",
+  "description": "CRUD for nodes in XML files based on XPath queries",
+  "version": "0.6.0-dev",
+  "homepage": "https://github.com/fhfaa/grunt-xmlstoke",
   "author": {
-    "name": "github/fhfaa",
+    "name": "Flo Ziemer",
     "email": "flo@schinkenfreunde.de"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/fhfaa/grunt-xmlpoke.git"
+    "url": "git://github.com/fhfaa/grunt-xmlstoke.git"
   },
   "bugs": {
-    "url": "https://github.com/fhfaa/grunt-xmlpoke/issues"
+    "url": "https://github.com/fhfaa/grunt-xmlstoke/issues"
   },
   "licenses": [
     {
       "type": "MIT",
-      "url": "https://github.com/fhfaa/grunt-xmlpoke/blob/master/LICENSE-MIT"
+      "url": "https://github.com/fhfaa/grunt-xmlstoke/blob/master/LICENSE-MIT"
     }
   ],
   "main": "Gruntfile.js",
@@ -39,7 +39,6 @@
   ],
   "dependencies": {
     "xpath": "0.0.6",
-    "xmldom": "~0.1.16",
-    "lodash": "2.4.1"
+    "xmldom": "~0.1.16"
   }
 }

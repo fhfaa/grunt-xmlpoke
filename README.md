@@ -1,15 +1,7 @@
-# grunt-xmlpoke
+# grunt-xmlstoke
 
-> Updates values in XML files based on XPath queries.  Similar to the `xmlpoke` task in NAnt.
+> Created/Reads/Updated/Deletes values in XML files based on XPath queries.  Similar to the `xmlstoke` task in NAnt.
 
-<br>
-> **Quickly hacked to allow creating new child elements or adding new attributes, or to remove elements.**
->
-> **Barely tested or error-proofed.**
-> 
-> **Please see** [the original repo](https://github.com/bdukes/grunt-xmlpoke) **for a stable and supported version of grunt-xmlpoke.**
->
-> **The rest if this README is that of the original repo.**
 
 ## Getting Started
 This plugin requires Grunt `~0.4.2`
@@ -17,23 +9,23 @@ This plugin requires Grunt `~0.4.2`
 If you haven't used [Grunt](http://gruntjs.com/) before, be sure to check out the [Getting Started](http://gruntjs.com/getting-started) guide, as it explains how to create a [Gruntfile](http://gruntjs.com/sample-gruntfile) as well as install and use Grunt plugins. Once you're familiar with that process, you may install this plugin with this command:
 
 ```shell
-npm install grunt-xmlpoke --save-dev
+npm install grunt-xmlstoke --save-dev
 ```
 
 Once the plugin has been installed, it may be enabled inside your Gruntfile with this line of JavaScript:
 
 ```js
-grunt.loadNpmTasks('grunt-xmlpoke');
+grunt.loadNpmTasks('grunt-xmlstoke');
 ```
 
-## The "xmlpoke" task
+## The "xmlstoke" task
 
 ### Overview
-In your project's Gruntfile, add a section named `xmlpoke` to the data object passed into `grunt.initConfig()`.
+In your project's Gruntfile, add a section named `xmlstoke` to the data object passed into `grunt.initConfig()`.
 
 ```js
 grunt.initConfig({
-  xmlpoke: {
+  xmlstoke: {
     updateTitle: {
       options: {
         xpath: '//title',
@@ -93,7 +85,7 @@ In this example, the text content of an element is set to a static value. So if 
 ```js
 grunt.initConfig({
   setTheNumber: {
-    xmlpoke: {
+    xmlstoke: {
       options: {
         xpath: '/abc',
         value: '123'
@@ -111,7 +103,7 @@ In this example, the value of an attribute is cleared. So if the `testing.xml` f
 
 ```js
 grunt.initConfig({
-  xmlpoke: {
+  xmlstoke: {
     updateAnAttribute: {
       options: {
         xpath: '/x/@y',
@@ -130,7 +122,7 @@ In this example, the value of an attribute is modified. So if the `testing.xml` 
 
 ```js
 grunt.initConfig({
-  xmlpoke: {
+  xmlstoke: {
     upperCaseTheY: {
       options: {
         xpath: '/x/@y',
@@ -157,7 +149,7 @@ In this example, the same value is put intp multiple locations. So if the `testi
 
 ```js
 grunt.initConfig({
-  xmlpoke: {
+  xmlstoke: {
     updateAllTheThings: {
       options: {
         xpath: ['/x/@y','/x'],
@@ -176,7 +168,7 @@ In this example, multiple replacements take place at once. So if the `testing.xm
 
 ```js
 grunt.initConfig({
-  xmlpoke: {
+  xmlstoke: {
     updateACoupleOfThings: {
       options: {
         replacements: [{
