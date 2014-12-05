@@ -1,7 +1,7 @@
 {
   "name": "grunt-xmlstoke",
   "description": "CRUD for nodes in XML files based on XPath queries",
-  "version": "0.6.0-dev",
+  "version": "0.6.0",
   "homepage": "https://github.com/fhfaa/grunt-xmlstoke",
   "author": {
     "name": "Flo Ziemer",
