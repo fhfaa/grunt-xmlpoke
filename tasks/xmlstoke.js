@@ -26,7 +26,12 @@ module.exports = function (grunt) {
 	// Helper function -
 	// DELETES a node from the XML document
 	function deleteNode(node) {
-		node.parentNode.removeChild(node);
+		if (node.nodeType === ATTRIBUTE_NODE) {
+			node.ownerElement.removeAttributeNode(node);
+		} else {
+			node.parentNode.removeChild(node);
+		}
+		
 	}
 	
 	

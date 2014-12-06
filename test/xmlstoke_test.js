@@ -39,16 +39,40 @@ var xmlDiffSpecs = [{
 	desc: 'should support namespace in xpath'
 }, {
 	name: 'create_attr',
-	desc: 'should be able to create regular attributes'
+	desc: 'should create regular attributes'
 }, {
 	name: 'create_attr_ns',
-	desc: 'should be able to create namespaced attributes'
+	desc: 'should create namespaced attributes'
 }, {
 	name: 'create_element',
-	desc: 'should be able to create regular elements'
+	desc: 'should create regular elements'
 }, {
 	name: 'create_element_ns',
-	desc: 'should be able to create namespaced elements'
+	desc: 'should create namespaced elements'
+}, {
+	name: 'xmldom_is_live',
+	desc: 'should use live dom (del[2],del[2] deletes [2..3])'
+}, {
+	name: 'delete_element',
+	desc: 'should delete single element'
+}, {
+	name: 'delete_element_multi',
+	desc: 'should delete multiple elements'
+}, {
+	name: 'delete_element_multi_xpaths',
+	desc: 'should delete elements given multiple xpaths'
+}, {
+	name: 'delete_element_nonexistent',
+	desc: 'should do nothing if element-to-delete is not found'
+}, {
+	name: 'delete_element_ns',
+	desc: 'should delete namespaced elements'
+}, {
+	name: 'delete_attribute',
+	desc: 'should delete attributes'
+}, {
+	name: 'delete_attribute_ns',
+	desc: 'should delete namespaced attribute'
 }];
 
 

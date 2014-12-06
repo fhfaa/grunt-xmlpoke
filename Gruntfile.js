@@ -45,6 +45,7 @@ module.exports = function (grunt) {
 				},
 				files: { 'tmp/testing_attribute.xml': 'test/fixtures/testing.xml' }
 			},
+			
 			testing_element: {
 				options: {
 					xpath: '/data',
@@ -52,6 +53,7 @@ module.exports = function (grunt) {
 				},
 				files: { 'tmp/testing_element.xml': 'test/fixtures/testing.xml' }
 			},
+			
 			numbers_elements: {
 				options: {
 					xpath: '//Number',
@@ -59,6 +61,7 @@ module.exports = function (grunt) {
 				},
 				files: { 'tmp/numbers_elements.xml': 'test/fixtures/numbers.xml' }
 			},
+			
 			numbers_no_match: {
 				options: {
 					xpath: '//Numbering',
@@ -66,12 +69,14 @@ module.exports = function (grunt) {
 				},
 				files: { 'tmp/numbers_no_match.xml': 'test/fixtures/numbers.xml' }
 			},
+			
 			default_value_is_empty: {
 				options: {
 					xpath: '/x/@y'
 				},
 				files: { 'tmp/default_value_is_empty.xml': 'test/fixtures/simple.xml' }
 			},
+			
 			multiple_xpath_queries: {
 				options: {
 					xpath: ['/x/@y','/x'],
@@ -79,6 +84,7 @@ module.exports = function (grunt) {
 				},
 				files: { 'tmp/multiple_xpath_queries.xml': 'test/fixtures/simple.xml' }
 			},
+			
 			multiple_replacements: {
 				options: {
 					replacements: [{
@@ -91,6 +97,7 @@ module.exports = function (grunt) {
 				},
 				files: { 'tmp/multiple_replacements.xml': 'test/fixtures/simple.xml' }
 			},
+			
 			value_as_function: {
 				options: {
 					xpath: '/x/@y',
@@ -100,6 +107,7 @@ module.exports = function (grunt) {
 				},
 				files: { 'tmp/value_as_function.xml': 'test/fixtures/simple.xml' }
 			},
+			
 			value_as_function_with_callback: {
 				options: {
 					xpath: '/data/@test-value',
@@ -109,6 +117,7 @@ module.exports = function (grunt) {
 				},
 				files: { 'tmp/value_as_function_with_callback.xml': 'test/fixtures/testing.xml' }
 			},
+			
 			namespaces: {
 				options: {
 					namespaces: { 'em': 'http://www.mozilla.org/2004/em-rdf#' },
@@ -117,6 +126,7 @@ module.exports = function (grunt) {
 				},
 				files: { 'tmp/namespaces.xml': 'test/fixtures/namespaces.xml' }
 			},
+			
 			create_attr: {
 				
 				options: {
@@ -129,6 +139,7 @@ module.exports = function (grunt) {
 				},
 				files: { 'tmp/create_attr.xml': 'test/fixtures/namespaces.xml' }
 			},
+			
 			create_attr_ns: {
 				options: {
 					namespaces: { 'em': 'http://www.mozilla.org/2004/em-rdf#' },
@@ -140,6 +151,7 @@ module.exports = function (grunt) {
 				},
 				files: { 'tmp/create_attr_ns.xml': 'test/fixtures/namespaces.xml' }
 			},
+			
 			create_element: {
 				options: {
 					namespaces: { 'em': 'http://www.mozilla.org/2004/em-rdf#' },
@@ -151,6 +163,7 @@ module.exports = function (grunt) {
 				},
 				files: { 'tmp/create_element.xml': 'test/fixtures/namespaces.xml' }
 			},
+			
 			create_element_ns: {
 				options: {
 					namespaces: { 'em': 'http://www.mozilla.org/2004/em-rdf#' },
@@ -161,7 +174,80 @@ module.exports = function (grunt) {
 					}]
 				},
 				files: { 'tmp/create_element_ns.xml' : 'test/fixtures/namespaces.xml' }
+			},
 			
+			xmldom_is_live: {
+				files: { 'tmp/xmldom_is_live.xml' : 'test/fixtures/numbers.xml' },
+				options: {
+					deletions: [{
+						xpath: ['/Numbers/Number[2]', '/Numbers/Number[2]']
+					}]
+				}
+			},
+			
+			delete_element: {
+				files: { 'tmp/delete_element.xml' : 'test/fixtures/numbers.xml' },
+				options: {
+					deletions: [{
+						xpath: '/Numbers/Number[2]'
+					}]
+				}
+			},
+			
+			delete_element_multi: {
+				files: { 'tmp/delete_element_multi.xml' : 'test/fixtures/numbers.xml' },
+				options: {
+					deletions: [{
+						xpath: ['/Numbers/Number']
+					}]
+				}
+			},
+			
+			delete_element_multi_xpaths: {
+				files: { 'tmp/delete_element_multi_xpaths.xml' : 'test/fixtures/numbers.xml' },
+				options: {
+					deletions: [{
+						xpath: ['/Numbers/Number[3]', '/Numbers/Number[2]']
+					}]
+				}
+			},
+			
+			delete_element_nonexistent: {
+				files: { 'tmp/delete_element_nonexistent.xml' : 'test/fixtures/numbers.xml' },
+				options: {
+					deletions: [{
+						xpath: ['/Numbers/Strings']
+					}]
+				}
+			},
+			
+			delete_element_ns: {
+				files: { 'tmp/delete_element_ns.xml' : 'test/fixtures/namespaces2.xml' },
+				options: {
+					namespaces: { 'em': 'http://www.mozilla.org/2004/em-rdf#' },
+					deletions: [{
+						xpath: ['//em:version']
+					}]
+				}
+			},
+			
+			delete_attribute: {
+				files: { 'tmp/delete_attribute.xml' : 'test/fixtures/simple.xml' },
+				options: {
+					deletions: [{
+						xpath: ['/x/@y']
+					}]
+				}
+			},
+			
+			delete_attribute_ns: {
+				files: { 'tmp/delete_attribute_ns.xml' : 'test/fixtures/namespaces2.xml' },
+				options: {
+					namespaces: { 'em': 'http://www.mozilla.org/2004/em-rdf#' },
+					deletions: [{
+						xpath: ['//Description/@em:hello']
+					}]
+				}
 			}
 		}
 	});
