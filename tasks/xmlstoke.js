@@ -112,7 +112,7 @@ module.exports = function (grunt) {
 	
 	
 	
-	function handleReadQuery(document, selectFn, returnArray, saveAs, callback, query) {
+	function handleReadQuery(selectFn, returnArray, saveAs, callback, query) {
 		var nodes,
 			ret;
 		
@@ -124,7 +124,7 @@ module.exports = function (grunt) {
 			throw new Error ('Invalid config name saveAs<string> for read query "' + query + '"');
 		}
 		
-		nodes = selectFn(query, document);
+		nodes = selectFn(query);
 		
 		
 		// If no node was found, return null.
@@ -163,8 +163,8 @@ module.exports = function (grunt) {
 	
 	
 	
-	function handleDeletionQuery(document, selectFn, query) {
-		var nodes = selectFn(query, document);
+	function handleDeletionQuery(selectFn, query) {
+		var nodes = selectFn(query);
 					
 		grunt.verbose.writeln('Deleting ' + nodes.length + ' node(s) for query: ' + query);
 		if (!nodes.length) { return; }
@@ -175,8 +175,8 @@ module.exports = function (grunt) {
 	
 	
 	
-	function handleUpdateQuery(document, selectFn, value, query) {
-		var nodes = selectFn(query, document);
+	function handleUpdateQuery(selectFn, value, query) {
+		var nodes = selectFn(query);
 		
 		grunt.verbose.writeln(
 			'Updating value of ' + nodes.length + ' node(s) ' + 
@@ -193,7 +193,7 @@ module.exports = function (grunt) {
 	
 	
 	
-	function handleInsertionQuery(document, selectFn, namespaces, value, nodeName, query) {
+	function handleInsertionQuery(selectFn, document, namespaces, value, nodeName, query) {
 		var name = typeof nodeName === 'string' ? nodeName : null,
 			isAttr = false,
 			ns = false,
@@ -220,7 +220,7 @@ module.exports = function (grunt) {
 			
 		}
 		
-		nodes = selectFn(query, document);
+		nodes = selectFn(query);
 		
 		grunt.verbose.writeln(
 			'Insert/updating childNode "' + (ns ? ns + ':' : '') + name + '" in ' +
@@ -273,12 +273,16 @@ module.exports = function (grunt) {
 				select = options.namespaces ?
 					xpath.useNamespaces(options.namespaces) :
 					xpath.select,
+					
+				wrappedSelect = function (query, context) {
+					return select(query, context || doc);
+				},
 				
 				// Bind file-level "globals" to handlerFns
-				readFn = handleReadQuery.bind(null, doc, select),
-				deletionFn = handleDeletionQuery.bind(null, doc, select),
-				updateFn = handleUpdateQuery.bind(null, doc, select),
-				insertionFn = handleInsertionQuery.bind(null, doc, select, options.namespaces || {});
+				readFn = handleReadQuery.bind(null, wrappedSelect),
+				deletionFn = handleDeletionQuery.bind(null, wrappedSelect),
+				updateFn = handleUpdateQuery.bind(null, wrappedSelect),
+				insertionFn = handleInsertionQuery.bind(null, wrappedSelect, doc, options.namespaces || {});
 			
 			
 			// Treat .updates as an alias for .replacements.
