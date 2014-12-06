@@ -23,7 +23,7 @@ module.exports = function (grunt) {
 	
 	
 	
-	// Helper function - 
+	// Helper function -
 	// DELETES a node from the XML document
 	function deleteNode(node) {
 		node.parentNode.removeChild(node);
@@ -32,7 +32,7 @@ module.exports = function (grunt) {
 	
 	
 	
-	// Helper function - 
+	// Helper function -
 	// UPDATES the value of a node, value being either a scalar value
 	// or a callback that receives the node to be manipulated
 	// Allows for i.e. fn prepend1(node) { return '1' + node.textContent; }
@@ -52,7 +52,7 @@ module.exports = function (grunt) {
 	
 	
 	
-	// Helper function - 
+	// Helper function -
 	// INSERT-IFEXIST-UPDATES an attribute node
 	function insertUpdateAttributeNode(node, name, val, ns, nsUri) {
 		if (ns) {
@@ -64,7 +64,7 @@ module.exports = function (grunt) {
 	
 	
 	
-	// Helper function - 
+	// Helper function -
 	// INSERT-IFEXIST-UPDATES an element node
 	function insertUpdateElementNode(document, selectFn, node, name, val, ns, nsUri) {
 		var newNode = selectFn(name, node)[0];
@@ -86,19 +86,78 @@ module.exports = function (grunt) {
 	
 	
 	
+	// Helper function -
+	// Extracts the value or text content of a node depending on its type (attr/elem)
+	function extractNodeValue(node) {
+		if (!node) { return null; }
+		
+		if (node.nodeType === ATTRIBUTE_NODE) {
+			return node.value;
+		} else {
+			return node.textContent;
+		}
+	}
+	
+	
+	
+	
 	// Helper function - 
-	// Takes <string> or [<string>*] and returns [<string>*]
+	// Takes <mixed> or [<mixed>*] and returns [<mixed>*]
 	// Defaults to []
-	function toArray(stringOrArray) {
-		if (stringOrArray instanceof Array) {
-			return stringOrArray.map(String);
+	function toArray(maybeArray) {
+		return maybeArray instanceof Array ? maybeArray : 
+			(maybeArray ? [maybeArray] : []);
+	}
+	
+	
+	
+	
+	function handleReadQuery(document, selectFn, returnArray, saveAs, callback, query) {
+		var nodes,
+			ret;
+		
+		callback = typeof callback === 'function' ? callback : false;
+		saveAs = String(saveAs);
+		
+		// Abort if there is no valid string to be used as grunt.option name
+		if (!saveAs) {
+			throw new Error ('Invalid config name saveAs<string> for read query "' + query + '"');
 		}
 		
-		if (typeof stringOrArray === 'string' ) {
-			return [stringOrArray];
+		nodes = selectFn(query, document);
+		
+		
+		// If no node was found, return null.
+		// This will throw an error unless handled by a callback.
+		if (nodes.length === 0) {
+			ret = null;
+			
+		// With just one result and the returnArray option not set,
+		// return a single value.
+		} else if (nodes.length === 1 && !returnArray) {
+			ret = extractNodeValue(nodes[0]);
+		
+		// Return an array of values if multiple nodes were found.
+		// Single value results can be returned as [val] with the returnArray opt.
+		} else {
+			ret = toArray(nodes).map(extractNodeValue);
 		}
 		
-		return [];
+		// If a callback is given, pass the extracted value/s to it.
+		// The callback can now either post-process the values, or 
+		// return null to reject the result and fail the task.
+		if (callback) {
+			ret = callback(ret);
+			
+			if (ret === null) {
+				throw new Error('Node value rejected by callback (Query: "' + query + '", Option: "' + saveAs + '"');
+			}
+			
+		} else if (ret === null) {
+			throw new Error('Failed to extract node value (Query: "' + query + '", Option: "' + saveAs + '"');
+		}
+		
+		grunt.option(saveAs, ret);
 	}
 	
 	
@@ -143,8 +202,7 @@ module.exports = function (grunt) {
 		namespaces = namespaces || {};
 		
 		if (!name) {
-			grunt.log.warn('No node<string> given for insertion at ' + query);
-			return false;
+			throw new Error('No node<string> given for insertion into "' + query + '"');
 		}
 		
 		// Check if it's an attribute
@@ -159,8 +217,7 @@ module.exports = function (grunt) {
 			name = name.substring(name.lastIndexOf(':') + 1);
 			
 			if (!namespaces[ns]) {
-				grunt.log.error('No URI given for namespace "' + ns + '" in options.namespaces');
-				return false;
+				throw new Error('No URI given for namespace "' + ns + '" in options.namespaces');
 			}
 			
 		}
@@ -197,19 +254,22 @@ module.exports = function (grunt) {
 		// Merge task-specific and/or target-specific options with these defaults.
 		var options = this.options();
 		
+		try {
+		
 		// Iterate over all given file groups.
 		this.files.forEach(function (f) {
+		
 			// Accept only a single src file per dest
 			if (f.src.length > 1) {
-				grunt.log.warn('Only a single src file per dest is supported. ' + f.src.length + ' given.');
-				return false;
+				throw new Error('Only a single src file per dest is supported. ' + f.src.length + ' given.');
 			}
 			
 			// Make sure the source file exists
 			if (!grunt.file.exists(f.src[0])) {
-				grunt.log.warn('Source file "' + f.src[0] + '" not found.');
-				return false;
+				throw new Error('Source file "' + f.src[0] + '" not found.');
 			}
+			
+			
 			
 			var doc = domParser.parseFromString(grunt.file.read(f.src[0])),
 				select = options.namespaces ?
@@ -217,54 +277,63 @@ module.exports = function (grunt) {
 					xpath.select,
 				
 				// Bind file-level "globals" to handlerFns
+				readFn = handleReadQuery.bind(null, doc, select),
 				deletionFn = handleDeletionQuery.bind(null, doc, select),
 				updateFn = handleUpdateQuery.bind(null, doc, select),
 				insertionFn = handleInsertionQuery.bind(null, doc, select, options.namespaces || {});
 			
 			
-			// Handle deletions
-			(options.deletions || []).
-				forEach(function (deletion) {
-					toArray(deletion.xpath).
-						forEach(deletionFn);
-				});			
-			
-			// Handle insertions
-			(options.insertions || []).
-				forEach(function (insertion) {
-					toArray(insertion.xpath).
-						forEach(insertionFn.bind(null, insertion.value, insertion.node));
-				});
-			
-			// Handle replacements
+			// Treat .updates as an alias for .replacements.
 			// If "xpath" is given directly inside of the options object,
-			// assume we are in xmlpoke-mode and treat the entire options obj
-			// as the config for a single replacement action.
-			(options.replacements || options.updates || (options.xpath ? [options] : [])).
-				forEach(function (replacement) {
-					toArray(replacement.xpath).
-						forEach(updateFn.bind(null, replacement.value));
-				});
+			// treat it as the config for a single update action.
+			options.replacements = options.replacements || options.updates || 
+				(options.xpath ? [options] : []);
 			
-			// Actions is a customizable array of insertions, deletions and updates, but in any order
+			
+			// Actions is a customizable array of reads, insertions, deletions and updates,
+			// but in any order.
 			// The type of action is denoted by the first char of the "type" option string (CI)
-			// That way, "i", "INS", "inSert", and even "idiotic code" denote an Insertion,
-			// While anything starting with d/D denotes a deletion.
-			// Defaults to Update
-			(options.actions || []).
+			// That way, "i", "INS", "inSert", and even "idiotic c0de" all denote an Insertion.
+			//
+			// C or I: Insert
+			// R: Read
+			// U: Update (assumed default)
+			// D: Delete
+			[].concat(
+				toArray(options.reads).map(function (e) { e.type = 'R'; return e; }),
+				toArray(options.deletions).map(function (e) { e.type = 'D'; return e; }),
+				toArray(options.insertions).map(function (e) { e.type = 'I'; return e; }),
+				toArray(options.replacements),
+				toArray(options.actions)
+			).
 				forEach(function (action) {
 					var type = (action.type || '').toUpperCase().charAt(0);
-					switch (action.type) {
-						case 'D': toArray(action.xpath).
-							forEach(deletionFn);
+					
+					switch (type) {
+						case 'R': // READ
+							toArray(action.xpath).
+								filter(function (xpath, i) {
+									// Allow only one xpath per read action so as not to overcomplicate returns
+									if (i === 0) { return true; }
+									grunt.log.warn('Discarding secondary xpath "' + xpath + '" in read action');
+									return false;
+								}).
+								forEach(readFn.bind(null, !!action.returnArray, action.saveAs, action.callback));
+								break;
+						case 'D': // DELETE
+							toArray(action.xpath).
+								forEach(deletionFn);
 							break;
-						case 'I': toArray(action.xpath).
-							forEach(insertionFn.bind(null, action.value, action.node));
+						case 'I': // INSERT-UPDATE
+							toArray(action.xpath).
+								forEach(insertionFn.bind(null, action.value, action.node));
 							break;
-						default: toArray(action.xpath).
-							forEach(updateFn.bind(null, action.value));
+						default: // UPDATE
+							toArray(action.xpath).
+								forEach(updateFn.bind(null, action.value));
 					}
 				});
+			
 			
 			// Write the destination file.
 			grunt.file.write(f.dest, xmlSerializer.serializeToString(doc));
@@ -272,5 +341,11 @@ module.exports = function (grunt) {
 			// Print a success message.
 			grunt.log.writeln('File ' + f.dest.cyan + ' created.');
 		});
+		
+		} catch (ex) {
+			// Fail the task if an error was encountered
+			grunt.log.error(ex.message);
+			return false;
+		}
 	});
 };
