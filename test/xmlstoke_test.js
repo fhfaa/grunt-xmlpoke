@@ -85,6 +85,21 @@ var xmlDiffSpecs = [{
 }, {
 	name: 'deletions_as_actions',
 	desc: 'should allow deletions as part of actions array'
+}, {
+	name: 'read_write_swap',
+	desc: 'should swap the values of two nodes'
+}, {
+	name: 'read_array',
+	desc: 'should read and save an array of values'
+}, {
+	name: 'postprocess_read_result',
+	desc: 'should be able to manipulate read data before return'
+}, {
+	name: 'recover_from_nullread',
+	desc: 'should not throw and return value from callback despite null'
+}, {
+	name: 'discard_surplus_xpaths_for_read',
+	desc: 'should discard all but the first xpath for read query'
 }];
 
 

@@ -316,6 +316,109 @@ module.exports = function (grunt) {
 				},
 				files: { 'tmp/deletions_as_actions.xml' : 'test/fixtures/numbers.xml' }
 			},
+			
+			
+			// -----
+			// Reads
+			// -----
+			
+			read_write_swap: {
+				options: {
+					actions: [{
+						type: 'R',
+						xpath: '/Numbers/Number[1]',
+						saveAs: 'myValue1'
+					}, {
+						type: 'R',
+						xpath: '/Numbers/Number[2]',
+						saveAs: 'myValue2'
+					}, {
+						xpath: '/Numbers/Number[1]',
+						value: function () { return grunt.option('myValue2'); }
+					}, {
+						xpath: '/Numbers/Number[2]',
+						value: function () { return grunt.option('myValue1'); }
+					}]
+				},
+				files: { 'tmp/read_write_swap.xml' : 'test/fixtures/numbers.xml' }
+			},
+			
+			read_array: {
+				options: {
+					actions: [{
+						type: 'R',
+						xpath: '/Numbers/Number',
+						saveAs: 'myArray'
+					}, {
+						xpath: '/Numbers/Number[2]',
+						value: function () { return grunt.option('myArray').join('/'); }
+					}]
+				},
+				files: { 'tmp/read_array.xml' : 'test/fixtures/numbers.xml' }
+			},
+			
+			read_single_as_array: {
+				options: {
+					actions: [{
+						type: 'R',
+						xpath: '/Numbers/Number[1]',
+						saveAs: 'myArray2',
+						returnArray: true
+					}, {
+						xpath: '/Numbers/Number[2]',
+						value: function () { return grunt.option('myArray2') instanceof Array ? "OK!" : ":("; }
+					}]
+				},
+				files: { 'tmp/read_single_as_array.xml' : 'test/fixtures/numbers.xml' }
+			},
+			
+			postprocess_read_result: {
+				options: {
+					actions: [{
+						type: 'R',
+						xpath: '/Numbers/Number[1]',
+						saveAs: 'something',
+						callback: function (readResult) {
+							return readResult === '1' ? 'It\'s ' + readResult + '!' : 'It\'s something bad';
+						}
+					}, {
+						xpath: '/Numbers/Number[2]',
+						value: function () { return grunt.option('something'); }
+					}]
+				},
+				files: { 'tmp/postprocess_read_result.xml' : 'test/fixtures/numbers.xml' }
+			},
+			
+			recover_from_nullread: {
+				options: {
+					actions: [{
+						type: 'R',
+						xpath: '/Numbers/Number[4]',
+						saveAs: 'maybenull',
+						callback: function (readResult) {
+							return readResult === null ? "recovered" : ":(";
+						}
+					}, {
+						xpath: '/Numbers/Number[2]',
+						value: function () { return grunt.option('maybenull'); }
+					}]
+				},
+				files: { 'tmp/recover_from_nullread.xml' : 'test/fixtures/numbers.xml' }
+			},
+			
+			discard_surplus_xpaths_for_read: {
+				options: {
+					actions: [{
+						type: 'R',
+						xpath: ['/Numbers/Number[1]', '/Numbers/Number[2]'],
+						saveAs: 'oneortwo'
+					}, {
+						xpath: '/Numbers/Number[3]',
+						value: function () { return grunt.option('oneortwo') === '1' ? 'OK!' : ':('; }
+					}]
+				},
+				files: { 'tmp/discard_surplus_xpaths_for_read.xml' : 'test/fixtures/numbers.xml' }
+			}
 		}
 	});
 	
