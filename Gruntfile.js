@@ -43,53 +43,41 @@ module.exports = function (grunt) {
 					xpath: '/data/@test-value',
 					value: 'UPDATE'
 				},
-				files: {
-					'tmp/testing_attribute.xml': 'test/fixtures/testing.xml'
-				}
+				files: { 'tmp/testing_attribute.xml': 'test/fixtures/testing.xml' }
 			},
 			testing_element: {
 				options: {
 					xpath: '/data',
 					value: 'UPDATED information'
 				},
-				files: {
-					'tmp/testing_element.xml': 'test/fixtures/testing.xml'
-				}
+				files: { 'tmp/testing_element.xml': 'test/fixtures/testing.xml' }
 			},
 			numbers_elements: {
 				options: {
 					xpath: '//Number',
 					value: '90'
 				},
-				files: {
-					'tmp/numbers_elements.xml': 'test/fixtures/numbers.xml'
-				}
+				files: { 'tmp/numbers_elements.xml': 'test/fixtures/numbers.xml' }
 			},
 			numbers_no_match: {
 				options: {
 					xpath: '//Numbering',
 					value: '999'
 				},
-				files: {
-					'tmp/numbers_no_match.xml': 'test/fixtures/numbers.xml'
-				}
+				files: { 'tmp/numbers_no_match.xml': 'test/fixtures/numbers.xml' }
 			},
 			default_value_is_empty: {
 				options: {
 					xpath: '/x/@y'
 				},
-				files: {
-					'tmp/default_value_is_empty.xml': 'test/fixtures/simple.xml'
-				}
+				files: { 'tmp/default_value_is_empty.xml': 'test/fixtures/simple.xml' }
 			},
 			multiple_xpath_queries: {
 				options: {
 					xpath: ['/x/@y','/x'],
 					value: '111'
 				},
-				files: {
-					'tmp/multiple_xpath_queries.xml': 'test/fixtures/simple.xml'
-				}
+				files: { 'tmp/multiple_xpath_queries.xml': 'test/fixtures/simple.xml' }
 			},
 			multiple_replacements: {
 				options: {
@@ -101,98 +89,79 @@ module.exports = function (grunt) {
 						value: 'M'
 					}]
 				},
-				files: {
-					'tmp/multiple_replacements.xml': 'test/fixtures/simple.xml'
-				}
+				files: { 'tmp/multiple_replacements.xml': 'test/fixtures/simple.xml' }
 			},
 			value_as_function: {
 				options: {
 					xpath: '/x/@y',
-					value: function(){
+					value: function () {
 						return 'value from a function';
 					}
 				},
-				files: {
-					'tmp/value_as_function.xml': 'test/fixtures/simple.xml'
-				}
+				files: { 'tmp/value_as_function.xml': 'test/fixtures/simple.xml' }
 			},
 			value_as_function_with_callback: {
 				options: {
 					xpath: '/data/@test-value',
-					value: function(node){
+					value: function (node) {
 						return node.value.toUpperCase();
 					}
 				},
-				files: {
-					'tmp/value_as_function_with_callback.xml': 'test/fixtures/testing.xml'
-				}
+				files: { 'tmp/value_as_function_with_callback.xml': 'test/fixtures/testing.xml' }
 			},
 			namespaces: {
-				dest: 'tmp/namespaces.xml',
-				src: 'test/fixtures/namespaces.xml',
 				options: {
-					namespaces: {
-						'em': 'http://www.mozilla.org/2004/em-rdf#'
-					},
+					namespaces: { 'em': 'http://www.mozilla.org/2004/em-rdf#' },
 					xpath: '/RDF/Description/em:version',
 					value: '1.2.4'
 				},
+				files: { 'tmp/namespaces.xml': 'test/fixtures/namespaces.xml' }
 			},
 			create_attr: {
-				dest: 'tmp/create_attr.xml',
-				src: 'test/fixtures/namespaces.xml',
+				
 				options: {
-					namespaces: {
-						'em': 'http://www.mozilla.org/2004/em-rdf#'
-					},
+					namespaces: { 'em': 'http://www.mozilla.org/2004/em-rdf#' },
 					insertions: [{
 						xpath: '//Description',
 						node: '@hello',
 						value: 'world'
 					}]
-				}
+				},
+				files: { 'tmp/create_attr.xml': 'test/fixtures/namespaces.xml' }
 			},
 			create_attr_ns: {
-				dest: 'tmp/create_attr_ns.xml',
-				src: 'test/fixtures/namespaces.xml',
 				options: {
-					namespaces: {
-						'em': 'http://www.mozilla.org/2004/em-rdf#'
-					},
+					namespaces: { 'em': 'http://www.mozilla.org/2004/em-rdf#' },
 					insertions: [{
 						xpath: '//Description',
 						node: '@em:helloTwo',
 						value: 'world'
 					}]
-				}
+				},
+				files: { 'tmp/create_attr_ns.xml': 'test/fixtures/namespaces.xml' }
 			},
 			create_element: {
-				dest: 'tmp/create_element.xml',
-				src: 'test/fixtures/namespaces.xml',
 				options: {
-					namespaces: {
-						'em': 'http://www.mozilla.org/2004/em-rdf#'
-					},
+					namespaces: { 'em': 'http://www.mozilla.org/2004/em-rdf#' },
 					insertions: [{
 						xpath: '//Description',
 						node: 'new-elem',
 						value: 'world'
 					}]
-				}
+				},
+				files: { 'tmp/create_element.xml': 'test/fixtures/namespaces.xml' }
 			},
 			create_element_ns: {
-				dest: 'tmp/create_element_ns.xml',
-				src: 'test/fixtures/namespaces.xml',
 				options: {
-					namespaces: {
-						'em': 'http://www.mozilla.org/2004/em-rdf#'
-					},
+					namespaces: { 'em': 'http://www.mozilla.org/2004/em-rdf#' },
 					insertions: [{
 						xpath: '//Description',
 						node: 'em:new-elem',
 						value: 'worldTwo'
 					}]
-				}
+				},
+				files: { 'tmp/create_element_ns.xml' : 'test/fixtures/namespaces.xml' }
+			
 			}
 		}
 	});
