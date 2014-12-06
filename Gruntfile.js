@@ -33,11 +33,16 @@ module.exports = function (grunt) {
 		
 		// Before generating any new files, remove any previously-created files.
 		clean: {
-			tests: ['tmp']
+			tests: ['tmp/*.*']
 		},
 		
 		// Configuration to be run (and then tested).
 		xmlstoke: {
+			
+			// -------------------------------
+			// UPDATES (xmlpoke functionality)
+			// -------------------------------
+			
 			testing_attribute: {
 				options: {
 					xpath: '/data/@test-value',
@@ -118,6 +123,11 @@ module.exports = function (grunt) {
 				files: { 'tmp/value_as_function_with_callback.xml': 'test/fixtures/testing.xml' }
 			},
 			
+			
+			// ----------
+			// NAMESPACES
+			// ----------
+			
 			namespaces: {
 				options: {
 					namespaces: { 'em': 'http://www.mozilla.org/2004/em-rdf#' },
@@ -126,6 +136,11 @@ module.exports = function (grunt) {
 				},
 				files: { 'tmp/namespaces.xml': 'test/fixtures/namespaces.xml' }
 			},
+			
+			
+			// ---------
+			// INSERTION
+			// ---------
 			
 			create_attr: {
 				
@@ -175,6 +190,11 @@ module.exports = function (grunt) {
 				},
 				files: { 'tmp/create_element_ns.xml' : 'test/fixtures/namespaces.xml' }
 			},
+			
+			
+			// --------
+			// DELETION
+			// --------
 			
 			xmldom_is_live: {
 				files: { 'tmp/xmldom_is_live.xml' : 'test/fixtures/numbers.xml' },
@@ -248,7 +268,54 @@ module.exports = function (grunt) {
 						xpath: ['//Description/@em:hello']
 					}]
 				}
-			}
+			},
+			
+			
+			
+			// -------
+			// Aliases
+			// -------
+			
+			updates_as_replacements: {
+				options: {
+					updates: [{
+						xpath: '/data',
+						value: 'UPDATED information'
+					}]
+				},
+				files: { 'tmp/updates_as_replacements.xml': 'test/fixtures/testing.xml' }
+			},
+			
+			replacements_as_actions: {
+				options: {
+					actions: [{
+						xpath: '/data',
+						value: 'UPDATED information'
+					}]
+				},
+				files: { 'tmp/replacements_as_actions.xml': 'test/fixtures/testing.xml' }
+			},
+			
+			insertions_as_actions: {
+				options: {
+					actions: [{
+						type: 'I',
+						xpath: '/Numbers',
+						node: 'something'
+					}]
+				},
+				files: { 'tmp/insertions_as_actions.xml' : 'test/fixtures/numbers.xml' }
+			},
+			
+			deletions_as_actions: {
+				options: {
+					actions: [{
+						type: 'D',
+						xpath: '/Numbers/Number[2]'
+					}]
+				},
+				files: { 'tmp/deletions_as_actions.xml' : 'test/fixtures/numbers.xml' }
+			},
 		}
 	});
 	

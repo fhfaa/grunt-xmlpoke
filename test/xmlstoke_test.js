@@ -73,6 +73,18 @@ var xmlDiffSpecs = [{
 }, {
 	name: 'delete_attribute_ns',
 	desc: 'should delete namespaced attribute'
+}, {
+	name: 'updates_as_replacements',
+	desc: 'should allow updates as alias for replacements'
+}, {
+	name: 'replacements_as_actions',
+	desc: 'should allow replacements as part of actions array'
+}, {
+	name: 'insertions_as_actions',
+	desc: 'should allow insertions as part of actions array'
+}, {
+	name: 'deletions_as_actions',
+	desc: 'should allow deletions as part of actions array'
 }];
 
 
