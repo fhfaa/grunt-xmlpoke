@@ -83,7 +83,7 @@ module.exports = function (grunt) {
 			node.appendChild(newNode);
 		}
 		
-		if (val) { 
+		if (val) {
 			newNode.textContent = val;
 		}
 	}
@@ -332,6 +332,7 @@ module.exports = function (grunt) {
 								forEach(deletionFn);
 							break;
 						case 'I': // INSERT-UPDATE
+						case 'C': // or CREATE
 							toArray(action.xpath).
 								forEach(insertionFn.bind(null, action.value, action.node));
 							break;
