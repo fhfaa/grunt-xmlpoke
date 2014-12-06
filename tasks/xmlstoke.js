@@ -199,8 +199,6 @@ module.exports = function (grunt) {
 			ns = false,
 			nodes;
 		
-		namespaces = namespaces || {};
-		
 		if (!name) {
 			throw new Error('No node<string> given for insertion into "' + query + '"');
 		}
