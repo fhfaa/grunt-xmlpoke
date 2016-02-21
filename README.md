@@ -281,7 +281,7 @@ grunt.initConfig({
         actions: [{
           type: 'ins'
           xpath: '//x',
-          node: '@a
+          node: '@a',
           value: '2'
         }, {
           type: 'ins'
