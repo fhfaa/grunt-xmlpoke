@@ -199,7 +199,7 @@ grunt.initConfig({
           xpath: '/abc',
           value: '123'
         }, {
-          xpath: '/abc/@attr
+          xpath: '/abc/@attr',
           value: '2'
         }],
       }
